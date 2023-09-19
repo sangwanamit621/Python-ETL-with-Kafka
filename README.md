@@ -12,6 +12,7 @@ In this project, we will read data from a file and will produce and consume the 
 2. Send this data in the respective topic of kafka using Kafka Producer
 3. Consume the data from respective topic
 4. Dump the consumed data in the mongoDB so that we can use the data to perform other required operations
+   ![Screenshot from 2023-09-19 19-47-23](https://github.com/sangwanamit621/kafka-etl/assets/96620780/d32ffeae-e40c-492e-9784-cbaf34138702)
 
 ## Tasks Performed
 1. Setup the Kafka cluster and MongoDB Cluster using docker (We have used docker-compose to set up the clusters over a custom defined network)
@@ -21,5 +22,6 @@ In this project, we will read data from a file and will produce and consume the 
 5. Consume the data from different topics using Kafka Consumer
 6. Establish connection with MongoDB cluster running on docker container
 7. Create a database and dump the data of each topic in respective collection
+
 
 
