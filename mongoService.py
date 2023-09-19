@@ -16,12 +16,12 @@ class Mongo():
         """
         self.username = username
         self.password = password        
-        self.client = pm.MongoClient("mongodb+srv://sangwanamit621:5QWdMBfjXY9Xof9D@kafkaspark.hutjf48.mongodb.net/?retryWrites=true&w=majority")
+        self.client = pm.MongoClient("mongodb://{}:{}@0.0.0.0:27017".format(username,password))
         self.checkConnection()
 
 
     def checkConnection(self):
-        # checking if username and password are correct
+        # checking if username and password are correct by performing an operation
         try:
             if type(self.client.list_database_names())==list:
                 print("Connection Established with MongoDB Cluster")
@@ -35,13 +35,12 @@ class Mongo():
 
     def getCollectionObject(self, db:str, collection:str):
         """
-        Lists available databases in the cluster
+        Creates collection inside a database in a cluster
         """        
         try:
             self.db_obj = self.client.get_database(name=db)
             self.collection_obj = self.db_obj.get_collection(name=collection)
             print(f"Successfully Connected with Collection: {collection} of Database: {db} in mongoDB cluster")
-            return self.collection_obj
         except Exception as e:
             error_message = e.details.get('errmsg', 'Unknown error')
             raise Exception("Error occurred while performing the operation: "+error_message)
@@ -66,7 +65,7 @@ class Mongo():
 
     def updateRecords(self, db, collection, condition:dict,updatedRecord:dict):
         """
-        Takes condition and updates records which satisfies the condition and returns message with specifying count of updated records 
+        Takes condition and updates records which satisfies the condition and prints message to give count of updated records 
         """
         self.db_obj = self.client.get_database(name=db)
         self.collection_obj = self.db_obj.get_collection(name=collection)
@@ -89,7 +88,7 @@ class Mongo():
         
     def deleteRecords(self, db, collection, condition:dict):
         """
-        Takes condition and deletes records which satisfies the condition and returns message with specifying count of deleted records 
+        Takes condition and deletes records which satisfies the condition and prints message to give count of deleted records 
         """
         self.db_obj = self.client.get_database(name=db)
         self.collection_obj = self.db_obj.get_collection(name=collection)
