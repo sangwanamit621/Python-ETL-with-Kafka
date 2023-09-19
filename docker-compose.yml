@@ -1,0 +1,153 @@
+networks:
+  my-app-network:
+    name: my-app
+    external: true
+
+
+services:
+  db:
+    image: mongo
+    container_name: mongo_db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: connect
+    volumes:
+      - ./mongoDB:/data/db
+    ports:
+      - 27017:27017
+
+    networks:
+      - my-app-network
+
+
+  kafkaService:
+    image: bitnami/kafka
+    container_name: kafkaCluster
+
+    environment:
+      - KAFKA_CFG_NODE_ID=0
+      - KAFKA_CFG_PROCESS_ROLES=controller,broker
+      - KAFKA_CFG_CONTROLLER_QUORUM_VOTERS=0@<your_host>:9093
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      - KAFKA_CFG_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      
+    volumes:
+      - ./kafkaData:/data/kafka
+
+    ports:
+      - 9094:9094
+
+    networks:
+      - my-app-network
+
+  spark-master:
+    image: spark:latest
+    container_name: master-node
+    volumes:
+      - .:/data/spark
+    environment:
+      - SPARK_MODE=master
+      - SPARK_RPC_AUTHENTICATION_ENABLED=no
+      - SPARK_RPC_ENCRYPTION_ENABLED=no
+      - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+      - SPARK_SSL_ENABLED=no
+      - SPARK_USER=spark
+    networks:
+      - my-app-network
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    ports:
+      - "9090:8080" # for spark UI and connect from host
+      - "9077:7077"
+      - "5040:4040"
+
+  spark-worker-1:
+    image: spark:latest
+    container_name: worker-1
+    networks:
+      - my-app-network
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    depends_on:
+      - spark-master
+    volumes:
+      - .:/data/spark
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_WORKER_CORES=4
+      - SPARK_WORKER_MEMORY=4g
+      - SPARK_EXECUTOR_MEMORY=1g
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_USER=spark
+    ports:
+      - "9091:8080" # for spark UI and connect from host
+      - "7071:7077"
+      - "5041:4040" # for detailed UI of spark
+      
+  spark-worker-2:
+    image: spark:latest
+    container_name: worker-2
+    volumes:
+      - .:/data/spark
+    networks:
+      - my-app-network
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    depends_on:
+      - spark-master
+    ports:
+      - "9092:8080" # for spark UI and connect from host
+      - "7072:7077"
+      - "5042:4040" # for detailed UI of spark
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_WORKER_CORES=4
+      - SPARK_WORKER_MEMORY=4g
+      - SPARK_EXECUTOR_MEMORY=1g
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_USER=spark
+
+    
+#   spark-master:
+#     image: spark
+#     container_name: spark-master-node
+#     volumes:
+#       - ./spark/apps:/opt/spark-apps
+#       - ./spark/data:/opt/spark-data
+
+#     networks:
+#       - my-app-network
+
+#     ports:
+#       - "9090:8080"
+#       - "7077:7077"
+
+#     environment:
+#       - SPARK_LOCAL_IP=spark-master-node
+#       - SPARK_WORKLOAD=master
+
+#   # worker-node-1:
+#   #   image: spark
+#   #   networks:
+#   #     - my-app-network
+
+#   #   volumes:
+#   #     - ./spark/apps:/opt/spark-apps
+#   #     - ./spark/data:/opt/spark-data
+
+#   #   ports:
+#   #     - "9091:8080"
+#   #     - "7000:7000"
+
+#   #   depends_on:
+#   #     - spark-master
+
+#   #   environment:
+#   #     - SPARK_MASTER=spark://spark-master:7077
+#   #     - SPARK_WORKER_MEMORY=3G
+#   #     - SPARK_EXECUTOR_MEMORY=1G
+#   #     - SPARK_WORKER_CORES=2     
+#   #     - SPARK_DRIVER_MEMORY=1G
+#   #     - SPARK_WORKLOAD=worker
+#   #     - SPARK_LOCAL_IP=spark-worker-node-1
+
+    
