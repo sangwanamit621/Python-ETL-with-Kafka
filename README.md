@@ -1,5 +1,5 @@
 # About the Project
-In this project, we will read data from a file and will produce and consume the data from kafka running on docker container. After consumption we will store the data in mongoDB.
+In this project, we will read data from a file and will produce and consume the data from kafka running on docker container. After consumption we will store the data in mongoDB. The purpose of this project is to provide a scalable and efficient way to load and process data from multiple sources into a single data store.
 
 ## Tech Stacks
 * Python
@@ -8,10 +8,11 @@ In this project, we will read data from a file and will produce and consume the 
 * MongoDB
 
 ## Project Flow
-1. Read data from the file.
-2. Send this data in the respective topic of kafka using Kafka Producer
-3. Consume the data from respective topic
-4. Dump the consumed data in the mongoDB so that we can use the data to perform other required operations
+1. Extract the data from the source files.
+2. Transform the data into a consistent format.
+3. Load the data into Apache Kafka.
+4. Consume the data from Apache Kafka.
+5. Load the data into MongoDB.
    ![Screenshot from 2023-09-19 19-47-23](https://github.com/sangwanamit621/kafka-etl/assets/96620780/d32ffeae-e40c-492e-9784-cbaf34138702)
 
 ## Tasks Performed
